@@ -15,7 +15,7 @@ def create_and_list_vendor(request):
     if request.method == 'POST':          
         print(type(dict(request.POST)))            
         print(dict(request.POST))      # Print and Check the data in request.POST as a dictionary
-        
+    
         context = json.loads(request.body)      # Load the JSON data from the request body
         print(context)          
         
@@ -131,6 +131,7 @@ def delete_purchase_order(request,po_id):
 
 @csrf_exempt 
 def update_purchase_order(request):
-    pass
+    if request.method == 'PUT':
+        pass
 
 
