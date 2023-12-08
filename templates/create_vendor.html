@@ -1,0 +1,22 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Vendor</title>
+</head>
+<body>
+    <h1>Create a New Vendor</h1>
+
+    <form method="post" action="{% url 'create_vendor' %}">
+       
+        {{ form.as_p }}
+         {% csrf_token %}
+        <button type="submit">Create Vendor</button>
+    </form>
+
+    {% comment %} <a href="{% url 'vendor_list' %}">Back to Vendor List</a> {% endcomment %}
+</body>
+</html>
