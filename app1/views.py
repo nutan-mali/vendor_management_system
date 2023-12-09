@@ -6,7 +6,7 @@ from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
 import json
 from django.http import JsonResponse
-
+from django.forms.models import model_to_dict
 def home(request):
     return HttpResponse('This is a Vendor Management Systemusing Django and Django REST Framework.This system will handle vendor profiles, track purchase orders, and calculate vendor performance metrics.')
  
@@ -65,14 +65,35 @@ def retrieve_vendor(request,vendor_id):
 @csrf_exempt    
 def update_vendor(request, vendor_id):
     if request.method == 'PUT':
-        vendor = Vendor.objects.filter(pk=vendor_id).values().first()
-        print(vendor)
-        context = json.loads(request.body)
-        print(type(context))
-        return JsonResponse({'message': 'updation in progress'})
         
-       
-            
+            vendor = Vendor.objects.get(pk=vendor_id)
+            context = json.loads(request.body)
+
+            # Update specific fields based on the content of the JSON data
+            for key, value in context.items():
+                setattr(vendor, key, value)
+
+            vendor.save()
+            print(f"Updated vendor is : {model_to_dict(vendor)}")
+            return JsonResponse({'message': 'Update done!'})
+        
+    return JsonResponse({'message': 'Invalid JSON data!'}, status=400)
+        
+@csrf_exempt 
+def update_purchase_order(request,po_id):
+    if request.method == 'PUT':
+        order = PurchaseOrder.objects.get(pk=po_id)
+        context = json.loads(request.body)  
+        for key,value in context.items():
+            setattr(order,key,value)
+        order.save()
+        print(f"Updated Purchase Order is :{model_to_dict(order)}")
+        return JsonResponse({'message': 'Purchase Order Update done!'})
+        
+    return JsonResponse({'message': 'Invalid JSON data!'}, status=400) 
+
+
+
 @csrf_exempt  
 def delete_vendor(request, vendor_id):
      if request.method == "DELETE":
@@ -129,9 +150,6 @@ def delete_purchase_order(request,po_id):
     else:
         return JsonResponse({'error': 'DELETE method is required'}, status=400)
 
-@csrf_exempt 
-def update_purchase_order(request):
-    if request.method == 'PUT':
-        pass
+
 
 
