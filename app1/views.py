@@ -1,70 +1,60 @@
-from django.shortcuts import render, redirect,HttpResponse, get_object_or_404
-from .models import Vendor
+from django.shortcuts import HttpResponse
 from .forms import VendorForm,PurchaseOrderForm
-from app1.models import Vendor,PurchaseOrder
-from django.contrib import messages
+from app1.models import Vendor,PurchaseOrder,PerformanceRecord
 from django.views.decorators.csrf import csrf_exempt
 import json
 from django.http import JsonResponse
 from django.forms.models import model_to_dict
+
+@csrf_exempt
 def home(request):
-    return HttpResponse('This is a Vendor Management Systemusing Django and Django REST Framework.This system will handle vendor profiles, track purchase orders, and calculate vendor performance metrics.')
+    return HttpResponse('This is a Vendor Management System using Django and Django REST Framework.This system will handle vendor profiles, track purchase orders, and calculate vendor performance metrics.')
  
 @csrf_exempt
 def create_and_list_vendor(request):
     if request.method == 'POST':          
         print(type(dict(request.POST)))            
-        print(dict(request.POST))      # Print and Check the data in request.POST as a dictionary
+        # Print and Check the data in request.POST as a dictionary
+        print(dict(request.POST))     
     
-        context = json.loads(request.body)      # Load the JSON data from the request body
+        # Load the JSON data from the request body # string to dict
+        context = json.loads(request.body)
         print(context)          
         
-        data = VendorForm(context)       # Create a VendorForm instance with the loaded JSON data
+        # Create a VendorForm instance with the loaded JSON data
+        data = VendorForm(context)   
         if data.is_valid():  
             vendor = data.save()        
-            return JsonResponse({'message': 'Vendor created successfully'}, status=200)     # Return a JSON response indicating successful creation
+        # Return a JSON response indicating successful creation
+            return JsonResponse({'message': 'Vendor created successfully'}, status=200)     
         else:
             return JsonResponse({'error': 'Invalid data format or type And Vendor Code Must Be unique'}, status=400)        # Return a JSON response with error messages if the form is not valid
     
     elif request.method == 'GET':       
-        vendor = Vendor.objects.all() # Retrieve all data of the Vendor model from the database
-        print(Vendor.objects.values())  # Print the values 
+        # Retrieve all data of the Vendor model from the database
+        vendor = Vendor.objects.all() 
+        # Print the values 
+        print(Vendor.objects.values())  
         print(type(list(Vendor.objects.values())))      
-        vendors = list(vendor.values())      #convert queryset to dict
+         #convert queryset to dict
+        vendors = list(vendor.values())  
            
-        return JsonResponse({'vendor': vendors}, safe=False)    # Return a JSON response containing the list of Vendor instances
+    # Return a JSON response containing the list of Vendor instances
+        return JsonResponse({'vendor': vendors}, safe=False)    
 
 @csrf_exempt    
-def retrieve_vendor(request,vendor_id):
-    if request.method == "GET":     
-        vendor = Vendor.objects.filter(pk=vendor_id).values().first()       # Retrieve the vendor with the specified ID and get all fields as a dictionary
-        print(vendor)       # Print the retrieved vendor 
+def handle_vendor(request, vendor_id):
+    if request.method == "GET": 
+        # Retrieve the vendor with the specified ID and get all fields as a dictionary
+        vendor = Vendor.objects.filter(pk=vendor_id).values().first()       
+        print(vendor)  
         if vendor is not None:
-            return JsonResponse(vendor, safe=False)     # Return the vendor details as a JSON response
+        # Return the vendor details as a JSON response
+            return JsonResponse(vendor, safe=False)     
         else:
-            return JsonResponse({'error': 'Vendor not found'}, status=404)   # Return an error response
-    return JsonResponse({'error': 'Method not allowed'}, status=405)        # Return an error response for any method other than GET
-    
-    #     if vendor is not None:
-    #         context = {
-    #             'id': vendor.id,
-    #             'name': vendor.name,
-    #             'contact_details': vendor.contact_details,
-    #             'address': vendor.address,
-    #             'vendor_code': vendor.vendor_code,
-    #             'on_time_delivery_rate': vendor.on_time_delivery_rate,
-    #             'quality_rating_avg': vendor.quality_rating_avg,
-    #             'average_response_time': vendor.average_response_time,
-    #             'fulfillment_rate': vendor.fulfillment_rate,
-    #         }
-    #         print(context)
-    #         return JsonResponse(context, safe=False)
-    #     else:
-    #         return JsonResponse({'error': 'Vendor not found'}, status=404)
-
-@csrf_exempt    
-def update_vendor(request, vendor_id):
-    if request.method == 'PUT':
+        # Print the retrieved vendor 
+            return JsonResponse({'error': 'Vendor not found'}, status=404)        
+    elif request.method == 'PUT':
         
             vendor = Vendor.objects.get(pk=vendor_id)
             context = json.loads(request.body)
@@ -76,43 +66,27 @@ def update_vendor(request, vendor_id):
             vendor.save()
             print(f"Updated vendor is : {model_to_dict(vendor)}")
             return JsonResponse({'message': 'Update done!'})
-        
-    return JsonResponse({'message': 'Invalid JSON data!'}, status=400)
-        
-@csrf_exempt 
-def update_purchase_order(request,po_id):
-    if request.method == 'PUT':
-        order = PurchaseOrder.objects.get(pk=po_id)
-        context = json.loads(request.body)  
-        for key,value in context.items():
-            setattr(order,key,value)
-        order.save()
-        print(f"Updated Purchase Order is :{model_to_dict(order)}")
-        return JsonResponse({'message': 'Purchase Order Update done!'})
-        
-    return JsonResponse({'message': 'Invalid JSON data!'}, status=400) 
-
-
-
-@csrf_exempt  
-def delete_vendor(request, vendor_id):
-     if request.method == "DELETE":
+    
+    elif request.method == "DELETE":
         vendor = Vendor.objects.filter(pk=vendor_id).first()
         vendor.delete()    
-        return JsonResponse({'message': 'Vendor deleted successfully'})  # Return a JSON response indicating successful deletion
+     # Return a JSON response indicating successful deletion
+        return JsonResponse({'message': 'Vendor deleted successfully'}) 
      
-     else:
-        return JsonResponse({'error': 'DELETE method is required'}, status=400) # Return a JSON response indicating that DELETE method is required
-        
-        
+    else:
+    # Return a JSON response indicating that DELETE method is required
+        return JsonResponse({'error': 'Method Not Allowed'}, status=400) 
+             
     
 @csrf_exempt 
 def create_and_list_purchase_order(request):
     
     if request.method == 'POST':
-        context = json.loads(request.body)    # loads the JSON data  
+        # loads the JSON data and converts string to dict
+        context = json.loads(request.body)    
         print(context)
-        data = PurchaseOrderForm(context)   #creates a PurchaseOrderForm instance with the loaded JSON data.
+        #creates a PurchaseOrderForm instance with the loaded JSON data.
+        data = PurchaseOrderForm(context)   
 
         if data.is_valid():
             order = data.save()
@@ -121,34 +95,73 @@ def create_and_list_purchase_order(request):
             return JsonResponse({'error': 'Invalid data format or type', 'errors': data.errors}, status=400)
 
     elif request.method == 'GET':
-        orders = PurchaseOrder.objects.all()    # Retrieve all fields of the PurchaseOrder model from the database
-        print(orders)
-        order_data = list(orders.values())      # Convert the queryset into a list of dictionaries containing fields and values
-        print(order_data)
+        # Retrieve all fields of the PurchaseOrder model from the database
+        orders = PurchaseOrder.objects.all()    
+         # orders
+        print(orders,'testing on line 84')     
+        # Convert the queryset into a list of dictionaries containing fields and values
+        order_data = list(orders.values())      
+        print(order_data)                        
         return JsonResponse({'orders': order_data}, safe=False)
 
     return JsonResponse({'error': 'Method not allowed'}, status=405)
 
 @csrf_exempt 
-def retrieve_purchase_order(request,po_id):
+def handle_purchase_order(request,po_id):
     if request.method == 'GET':
-        order = PurchaseOrder.objects.filter(pk=po_id).values().first()       # Retrieve the vendor with the specified ID and get all fields as a dictionary
-        print(order)       # Print the retrieved vendor 
+        # Retrieve the vendor with the specified ID and get all fields as a dictionary
+        order = PurchaseOrder.objects.filter(pk=po_id).values().first()       
+         # Print the retrieved vendor 
+        print(order)      
         if order is not None:
-            
-            return JsonResponse(order, safe=False)     # Return the vendor details as a JSON response
+        # Return the vendor details as a JSON response
+            return JsonResponse(order, safe=False)     
         else:
-            return JsonResponse({'error': 'order not found'}, status=404)   # Return an error response
-    return JsonResponse({'error': 'Method not allowed'}, status=405)  
+        # Return an error response
+            return JsonResponse({'error': 'order not found'}, status=404)   
 
-@csrf_exempt 
-def delete_purchase_order(request,po_id):
-    if request.method == 'DELETE':
+    elif request.method == 'PUT':
+        order = PurchaseOrder.objects.get(pk=po_id)
+        context = json.loads(request.body) 
+       
+        # Assuming 'vendor' is a key in the JSON payload
+        vendor_id = context.get('vendor', None)
+        if vendor_id is not None:
+            vendor_instance = Vendor.objects.get(pk=vendor_id)
+             # Set the vendor_id in the PurchaseOrder instance
+            order.vendor = vendor_instance
+        for key,value in context.items():
+            # Skip updating the 'vendor' field directly
+            if key == 'vendor':  
+                        continue
+            
+            setattr(order,key,value) 
+        order.save()
+        print(f"Updated Purchase Order is :{model_to_dict(order)}")
+        return JsonResponse({'message': 'Purchase Order Update done!'})
+    
+    elif request.method == 'DELETE':
         order = PurchaseOrder.objects.filter(pk=po_id).first()
         order.delete()    
-        return JsonResponse({'message': 'Order deleted successfully'})  # Return a JSON response indicating successful deletion
+    # Return a JSON response indicating successful deletion
+        return JsonResponse({'message': 'Order deleted successfully'})  
     else:
         return JsonResponse({'error': 'DELETE method is required'}, status=400)
+    
+ 
+   
+@csrf_exempt 
+def acknowledge_purchase_order(request, po_id):
+    pass
+
+
+
+@csrf_exempt 
+def vendor_performance(request, vendor_id):
+    pass
+
+
+    
 
 
 

@@ -23,18 +23,18 @@ urlpatterns = [
     # Vendor URLs
     path('admin/', admin.site.urls),
     path('', views.home, name='home'),
+
     path('api/vendors/', views.create_and_list_vendor, name='create_vendor'),
-    path('api/vendors/<int:vendor_id>/', views.retrieve_vendor, name='retrieve_vendor'),
-    path('api/vendors/<int:vendor_id>/update/', views.update_vendor, name='update_vendor'),
-    path('api/vendors/<int:vendor_id>/delete/', views.delete_vendor, name='delete_vendor'),
+    path('api/vendors/<int:vendor_id>/', views.handle_vendor, name='handle_vendor'),
     
     # Purchase Order (PO) URLs
     path('api/purchase_orders/', views.create_and_list_purchase_order, name='create_purchase_order'),
-    # path('api/purchase_orders/', views.list_purchase_orders, name='list_purchase_orders'),
-    path('api/purchase_orders/<int:po_id>/', views.retrieve_purchase_order, name='retrieve_purchase_order'),
-    path('api/purchase_orders/<int:po_id>/update/', views.update_purchase_order, name='update_purchase_order'),
-    path('api/purchase_orders/<int:po_id>/delete/', views.delete_purchase_order, name='delete_purchase_order'),
+    path('api/purchase_orders/<int:po_id>/', views.handle_purchase_order, name='handle_purchase_order'),
+    
 
     # Historical Performance
-
+    path('api/vendors/<int:vendor_id>/performance/', views.vendor_performance, name='vendor_performance'),
+    path('api/purchase_orders/<int:po_id>/acknowledge/', views.acknowledge_purchase_order, name='acknowledge_purchase_order'),
+    
 ]
+
