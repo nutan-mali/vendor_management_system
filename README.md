@@ -10,9 +10,13 @@ This repository contains the source code for a Vendor Management System with Per
 
 API Endpoints
 POST /api/vendors/: Create a new vendor.
+
 GET /api/vendors/: List all vendors.
+
 GET /api/vendors/{vendor_id}/: Retrieve details of a specific vendor.
+
 PUT /api/vendors/{vendor_id}/: Update a vendor's information.
+
 DELETE /api/vendors/{vendor_id}/: Delete a vendor.
 
 
