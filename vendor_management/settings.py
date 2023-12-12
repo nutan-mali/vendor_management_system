@@ -120,9 +120,9 @@ STATIC_URL = 'static/'
 
 
 # Specify the directory where additional static files are located
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
-]
+# STATICFILES_DIRS = [
+#     os.path.join(BASE_DIR, 'static'),
+# ]
 
 # Specify the directory where collected static files will be stored
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
