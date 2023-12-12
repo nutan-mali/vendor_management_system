@@ -5,6 +5,8 @@ from django.views.decorators.csrf import csrf_exempt
 import json
 from django.http import JsonResponse
 from django.forms.models import model_to_dict
+from django.db.models import Avg,F, ExpressionWrapper, fields
+
 
 @csrf_exempt
 def home(request):
@@ -17,7 +19,7 @@ def create_and_list_vendor(request):
         # Print and Check the data in request.POST as a dictionary
         print(dict(request.POST))     
     
-        # Load the JSON data from the request body # string to dict
+        # Load the JSON data from the request body # Loads converts a string to dict and vice versa .dumps
         context = json.loads(request.body)
         print(context)          
         
@@ -33,10 +35,14 @@ def create_and_list_vendor(request):
     elif request.method == 'GET':       
         # Retrieve all data of the Vendor model from the database
         vendor = Vendor.objects.all() 
-        # Print the values 
-        print(Vendor.objects.values())  
+        print(vendor)
+        # # Retrieve and print the values of all instances of the Vendor model. 
+        print(Vendor.objects.values()) 
+    
+
+        # prints the type of the object resulting from the conversion to a list 
         print(type(list(Vendor.objects.values())))      
-         #convert queryset to dict
+         # converts the QuerySet into a list of dictionaries. 
         vendors = list(vendor.values())  
            
     # Return a JSON response containing the list of Vendor instances
@@ -149,16 +155,78 @@ def handle_purchase_order(request,po_id):
         return JsonResponse({'error': 'DELETE method is required'}, status=400)
     
  
-   
+# On-Time Delivery Rate
+    # When: Each time a Purchase Order (PO) status changes to 'completed'.
+    # Here calculate the no of PO which are delieverd on or before the delebery_date.
+    # Then: devide this count by The total no of completed POs for that vendor.
+def cal_on_time_delivery_rate(vendor):
+    
+    completed_po = PurchaseOrder.objects.filter(vendor=vendor, status='completed')
+    print("complete POs ",completed_po)
+    # __lte (less than or equal to) lookup and the F object to reference the acknowledgment_date field.
+    # Here __lte checks delivery_date is <= acknowledgment_date.
+    # count() giving the count of completed purchase orders that meet the specified condition. 
+    on_time_delivery = completed_po.filter(delivery_date__lte=F('acknowledgment_date')).count()
+    print("On time deliverys " ,on_time_delivery)
+    total_completed_po = completed_po.count()
+    print("total completed Pos " ,total_completed_po)
+    
+    # Calculate the on-time delivery rate based on the count of completed purchase orders
+    # delivered on time (on_time_delivery) and the total count of completed purchase orders (total_completed_po).
+    # Avoid division by zero by setting on_time_delivery_rate to 0 if total_completed_po is not greater than 0.
+
+    on_time_delivery_rate = on_time_delivery / total_completed_po if total_completed_po > 0 else 0
+    vendor.on_time_delivery_rate = vendor.on_time_delivery_rate
+    vendor.save()
+
+# # Quality Rating Average
+# def cal_quality_rating_average(vendor):
+#     completed_po = PurchaseOrder.objects.filter(vendor=vendor, status='completed', quality_rating__isnull=False)
+#     quality_rating_avg = completed_po.aggregate(Avg('quality_rating'))['quality_rating__avg'] or 0
+#     vendor.quality_rating_avg = quality_rating_avg
+#     vendor.save()
+
+# # Average Response Time
+# def cal_average_response_time(vendor):
+#     completed_po = PurchaseOrder.objects.filter(vendor=vendor, status='completed', acknowledgment_date__isnull=False)
+#     avg_response_time = completed_po.aggregate(avg_rating=Avg(F('acknowledgment_date') - F('issue_date')))['acknowledgment_date__avg'] or 0
+#     vendor.average_response_time = avg_response_time.total_seconds() / 60  # Convert to minutes
+#     vendor.save()
+
+# # Fulfilment Rate
+# def cal_fulfilment_rate(vendor):
+#     total_po = PurchaseOrder.objects.filter(vendor=vendor)
+#     successfully_fulfilled_pos = total_po.filter(status='completed', issues__isnull=True).count()
+#     fulfilment_rate = successfully_fulfilled_pos / total_po.count() if total_po.count() > 0 else 0
+#     vendor.fulfilment_rate = fulfilment_rate
+#     vendor.save()
+
+
 @csrf_exempt 
 def acknowledge_purchase_order(request, po_id):
     pass
 
-
-
 @csrf_exempt 
 def vendor_performance(request, vendor_id):
     pass
+#     try:
+#         vendor = Vendor.objects.get(pk=vendor_id)
+#     except Vendor.DoesNotExist:
+#         return JsonResponse({'error': 'Vendor not found'}, status=404)
+
+#     # Call the functions to calculate performance metrics
+#     cal_on_time_delivery_rate(vendor)
+#     cal_quality_rating_average(vendor)
+#     cal_average_response_time(vendor)
+#     cal_fulfilment_rate(vendor)
+
+#     # Return the calculated metrics as a JSON response
+#     return JsonResponse({
+#         'on_time_delivery_rate': vendor.on_time_delivery_rate,
+#         'quality_rating_avg': vendor.quality_rating_avg,
+#         'average_response_time': vendor.average_response_time,
+#         'fulfilment_rate': vendor.fulfilment_rate
+#     })
 
 
     

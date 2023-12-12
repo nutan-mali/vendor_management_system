@@ -24,7 +24,7 @@ class PurchaseOrder(models.Model):
     delivery_date = models.DateTimeField()
     items = models.JSONField()
     quantity = models.IntegerField()
-    status = models.CharField(max_length=50)  
+    status = models.CharField(max_length=50,default='pending')  
     quality_rating = models.FloatField(null=True, blank=True)
     issue_date = models.DateTimeField()
     acknowledgment_date = models.DateTimeField(null=True, blank=True)
