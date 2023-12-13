@@ -11,11 +11,16 @@ class VendorForm(forms.ModelForm):
                   'quality_rating_avg', 'average_response_time', 'fulfillment_rate']
     
 
+class VendorModelChoiceField(forms.ModelChoiceField):
+    def to_python(self, value):
+        return int(value)
 
 class PurchaseOrderForm(forms.ModelForm):
+    # Exclude the 'vendor' field from user input
+    vendor = forms.ModelChoiceField(queryset=Vendor.objects.all(), required=False)
     class Meta:
         model = PurchaseOrder
-        fields = ['po_number', 'vendor', 'order_date', 'delivery_date', 'items', 'quantity', 'status', 
+        fields = ['po_number', 'vendor','order_date', 'delivery_date', 'items', 'quantity', 'status',
                   'quality_rating', 'issue_date', 'acknowledgment_date']
 
 

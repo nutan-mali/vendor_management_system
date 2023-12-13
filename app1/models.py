@@ -19,7 +19,7 @@ class Vendor(models.Model):
 
 class PurchaseOrder(models.Model):
     po_number = models.CharField(max_length=50, unique=True)
-    vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE)
+    vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE , related_name='purchase_orders_for_vendor')
     order_date = models.DateTimeField()
     delivery_date = models.DateTimeField()
     items = models.JSONField()
