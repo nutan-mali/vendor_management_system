@@ -326,7 +326,6 @@ def vendor_performance(request, vendor_id):
     
 
 @csrf_exempt
-
 def acknowledge_purchase_order(request, po_id):
     # Retrieve the PurchaseOrder instance with the specified primary key (po_id)
     order = get_object_or_404(PurchaseOrder, pk=po_id)
